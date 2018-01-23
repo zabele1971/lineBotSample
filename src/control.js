@@ -194,7 +194,9 @@ const interpretUserAnswer = async (ctx, event) => {
     
       // ctx.questionはQuestionオブジェクト（もしくはその子オブジェクト）のメンバ関数
       // setNewStatusToContextを呼び出すために、Question.getのの形にする
-      ret = await (await Question.get(ctx.status)).setNewStatusToContext(ctx, text);
+	  
+      // ret = await (await Question.get(ctx.status)).setNewStatusToContext(ctx, text);
+	  ret = await (await Question.get(ctx.question.status)).setNewStatusToContext(ctx, text); // ctx.statusではなく、ctx.question.statusで Questionを呼び出すこと
       return ctx;　
     }
     
