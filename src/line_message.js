@@ -63,23 +63,25 @@ const confirm = (question) => {
 
 
 const text = (question) => {
-  let msg = {
-    type: "text",
-    text: question.text
-  }
-  
   if(Array.isArray(question.answerCandidates) == false ||
      question.answerCandidates.length == 0)
-    return msg;
+    return question.text;
 
-  msg.text += "\n\n";
+  const msgArray = [ ];
+  let msg = ""
+  if(Array.isArray(question.text))
+	for(let value of question.text)
+      msgArray.push(value);
+  else
+	msg = question.text + "\n\n";
 
   for(let i = 0; i < question.answerCandidates.length; i++) {
-    msg.text += `（${i+1}）${question.answerCandidates[i].text}\n`;
+    msg += `（${i+1}）${question.answerCandidates[i].text}\n`;
   }
-
-  msg.text += "----\n上の選択肢から選び、数字を入力してください";
-  return msg;
+  
+  msgArray.push(msg.trim());
+  msgArray.push( "上の選択肢から選び、数字を入力してください");
+  return msgArray;
 }
 
 

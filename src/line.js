@@ -12,20 +12,35 @@ exports.LINE_CONFIG = LINE_CONFIG;     // server.jsから呼び出すために e
 
 const lineClient = new line.Client(LINE_CONFIG);
 
-exports.replyMessageToLine = async (token, msg) => {   // 本当にAsyncにする？
+
+const formatMessage = (aMsg) => {
+
   // 文字列のまま渡された値は、
   // LINE返信用のフォーマットに変更
-    if(typeof msg == 'string') {
-      replyMsg = {
+    if(typeof aMsg == 'string') {
+      return {
         type: 'text',
-        text: msg
+        text: aMsg
       };
     } else {
-      replyMsg = msg;
+      return aMsg;
     }
+}
 
-    logger.trace(`replyMessageToLine :token: ${token} :replyMsg: ${JSON.stringify(replyMsg)}`);
-    return await lineClient.replyMessage(token, replyMsg);
+
+exports.replyMessageToLine = async (token, msg) => {   // 本当にAsyncにする？
+
+  let replyMsg;
+  if(Array.isArray(msg)) {
+	replyMsg = [];
+	for(const value of msg)
+      replyMsg.push(formatMessage(value)); 
+  } else {
+	replyMsg = formatMessage(msg); //　この場合、replyMsgは文字列
+  }
+
+  logger.trace(`replyMessageToLine :token: ${token} :replyMsg: ${JSON.stringify(replyMsg)}`);
+  return await lineClient.replyMessage(token, replyMsg);
 }
 
 exports.handleLineError = (err) => {
