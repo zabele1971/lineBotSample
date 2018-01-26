@@ -100,9 +100,26 @@ class Question {
       return;
     }
 
+    // textで選択肢によって次のアクションが異なるケース
+    // confirmやbuttonsを textに変更しても動くようにしている
+    else if(this.type == "text" &&
+    　　　　　　　this.answerCandidates != null &&
+    　　　　　　　Array.isArray(this.answerCandidates)　&&
+    　　　　　　　this.answerCandidates.length > 0) {
+        
+      // control.js validateSelectedNumber内で範囲内の値かどうかはチェック済み
+      
+      if(this.answerCandidates[parseInt(text) - 1].next != null && this.answerCandidates[parseInt(text) - 1].next.success != null) {
+        // answerCandidates.next.successが指定されている場合は
+        // それをセットする
+        ctx.status = this.answerCandidates[parseInt(text) - 1].next.success;
+        return;
+      }
+    }
+
     // ボタンの場合、this.next.successではなく、answerCandidates[i].next.success
     // に次のステータスがセットされている
-    if(this.type == "confirm" || this.type == "buttons") {
+    else if(this.type == "confirm" || this.type == "buttons") {
 
       for(const value of this.answerCandidates) {
         if(value.text == text) {
@@ -244,6 +261,7 @@ const questionArray = [
     id:"START",
     "text":"ご要望の処理を選択してください",
     "type":"buttons",
+//    "type":"text",
     "class": Question,  
     "next":{},
     "answerCandidates": [
@@ -347,6 +365,7 @@ const questionArray = [
     "id":"RESCHEDULE_04",
     "text":"伝票番号:${orderid}\n配達日:${dt}\n時間帯:${tm}でよろしいですか？",
     "type":"confirm",
+//    "type":"text",
     "class": Question_RESCHEDULE_04,  
     "next":{},
     "previous": "RESCHEDULE_03",
