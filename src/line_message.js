@@ -19,10 +19,10 @@ const buttons = (question) => {
   // ボタンの最大数以上が指定されているとエラーとなるため、
   // 最大値で切る
   if(question.answerCandidates.length > LINE_MAX_BUTTONS)
-	logger.error('question.answerCandidates.length > LINE_MAX_BUTTONS');
-  
+    logger.error('question.answerCandidates.length > LINE_MAX_BUTTONS');
+
   let max = (question.answerCandidates.length > LINE_MAX_BUTTONS) ? LINE_MAX_BUTTONS : question.answerCandidates.length;
-  
+
   for(let i = 0; i < max; i++) {
     buttons.template.actions[i] = {
       type: "message",
@@ -30,7 +30,7 @@ const buttons = (question) => {
       text: question.answerCandidates[i].text
     }
   }
-  
+
   if(question.answerCandidates.length > 4)
     logger.error(`Maximum buttons are 4: ${question}`);
 
@@ -63,24 +63,30 @@ const confirm = (question) => {
 
 
 const text = (question) => {
+  // questionにanswerCandidatesがない、
+  // もしくは空の配列の場合は、
+  // question.textを返す
   if(Array.isArray(question.answerCandidates) == false ||
      question.answerCandidates.length == 0)
     return question.text;
 
+  // answerCandidatesがある場合、
+  // answerCandidatesの文字列を表示用メッセージに入れる
   const msgArray = [ ];
-  let msg = ""
+
   if(Array.isArray(question.text))
 	for(let value of question.text)
       msgArray.push(value);
   else
-	msg = question.text + "\n\n";
+    msgArray.push(question.text);
 
+  let msg = "";
   for(let i = 0; i < question.answerCandidates.length; i++) {
     msg += `（${i+1}）${question.answerCandidates[i].text}\n`;
   }
-  
+
   msgArray.push(msg.trim());
-  msgArray.push( "上の選択肢から選び、数字を入力してください");
+  msgArray.push( "上の選択肢から数字を選び、入力してください");
   return msgArray;
 }
 
@@ -105,5 +111,5 @@ logger.debug(question);
       return confirm(question);
     case "sticker" :
       return sticker(question);
-  }  
+  }
 }

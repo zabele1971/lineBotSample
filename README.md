@@ -10,7 +10,7 @@ Oracle DBからのデータ取得と更新を行う LINE Botのサンプルで�
 - Node.js
   - Node.jsはV8以上
   - Oracle Application Container Cloud Node.js V8.1.4で確認
-  - 開発はNode V8.9.4(Windows)
+  - 開発はnpm V8.9.4(Windows)を利用した
 - Oracle Database
   - Oracle Database 12c以上（PDBを利用）
     - 開発はOracle Database 12c 12.2.0.1 Standard Edtion (Windows)を利用
@@ -20,3 +20,17 @@ Oracle DBからのデータ取得と更新を行う LINE Botのサンプルで�
   - フリーの範囲で利用可能な機能を使用（ReplyMessage）
   
 (*) Oracle Cloudにアップロードする場合、accsディレクトリにある botSample.zipとmanifest.jsonを使ってください。
+
+## サンプルアプリの動き
+
+### 機能
+
+###メニュー表示を行う
+「メニュー」「始める」「はじめる」などと入力
+
+### 終わらせる場合
+「おわり」「おわる」「終わる」などと入力
+
+
+
+

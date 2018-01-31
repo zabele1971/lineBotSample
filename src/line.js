@@ -1,6 +1,7 @@
 ﻿const log4js = require('log4js');
 log4js.configure('log4js.config.json');
 const logger = log4js.getLogger("line.js");
+
 const jsonfile = require('jsonfile');
 const line = require('@line/bot-sdk');
 
@@ -11,6 +12,7 @@ const LINE_CONFIG = jsonfile.readFileSync('line.config.json');
 exports.LINE_CONFIG = LINE_CONFIG;     // server.jsから呼び出すために export
 
 const lineClient = new line.Client(LINE_CONFIG);
+const LINE_MAX_TEXT_MESSAGE_SIZE = 2000; // 
 
 
 const formatMessage = (aMsg) => {
@@ -28,15 +30,31 @@ const formatMessage = (aMsg) => {
 }
 
 
-exports.replyMessageToLine = async (token, msg) => {   // 本当にAsyncにする？
+exports.replyMessageToLine = async (token, msg) => {
 
-  let replyMsg;
+  let replyMsg = [];
   if(Array.isArray(msg)) {
-	replyMsg = [];
-	for(const value of msg)
+    for(const value of msg)
       replyMsg.push(formatMessage(value)); 
   } else {
-	replyMsg = formatMessage(msg); //　この場合、replyMsgは文字列
+    replyMsg.push(formatMessage(msg));
+  }
+  
+  // １回にリプライできるメッセージは最大5。6メッセージ以上ある場合。
+  // これを行わないと HTTP Error 400が返される
+  if(replyMsg.length > 5) {
+    logger.warn(`replyMsg.lenght is ${replyMsg.lenght}. Truncate messages to 4`);
+    const strTruncated = `（送信メッセージ数が制限を超えたため、以下、メッセージを省略しました）`;
+    
+    // ５メッセージ目の文字数が制限を超える場合、４メッセージ目までにして、メッセージを切り捨てる旨のメッセージを５番目として追加。
+    if((replyMsg[4].text.length + strTruncated + 2) > LINE_MAX_TEXT_MESSAGE_SIZE) {
+      replyMsg = replyMsg.slice(0, 4);
+      replyMsg.push(strTruncated);
+    } else {
+    // ５メッセージ目の文字数が制限を超えない場合、５メッセージ目のテキストにメッセージを切り捨てる旨のメッセージを追加。
+      replyMsg = replyMsg.slice(0, 5);
+      replyMsg[4].text = replyMsg[4].text + `\n\n${strTruncated}`;
+    }
   }
 
   logger.trace(`replyMessageToLine :token: ${token} :replyMsg: ${JSON.stringify(replyMsg)}`);
@@ -75,4 +93,3 @@ exports.handleLineError = (err) => {
   } else 
     return null;
 }
-//exports.handleLineError = handleLineError;
