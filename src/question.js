@@ -25,8 +25,6 @@ const getYYYYMMDD = (dt) => {
   return result;
 }
 
-
-
 const getDeliveryStatus = async (orderid, reschedule) => { // reschedule は boolean
   let ret;
   
@@ -57,14 +55,13 @@ const setDeliverySchedule = async (orderid, dt, tm) => {
              + "SET delivery_dt = :dt, delivery_tm = :tm "
              + "WHERE order_id = :id";
            
-    const result = db.executeSQL(sqltext,[dt, tm, orderid]);
+    const result = await db.executeSQL(sqltext,[dt, tm, orderid]);
     return true;
   } catch(err) {
       logger.error(`setDeliverySchedule: ${err}`);
       return false;
   };
 }
-
 
 /////////////////////////////
 class Question {
@@ -160,15 +157,25 @@ class Question_GET_STATUS extends Question {
 class Question_RESCHEDULE_01 extends Question {
 
   async setNewStatusToContext(ctx, text) {
-      let msg = await getDeliveryStatus(text, true); 
+    let msg = await getDeliveryStatus(text, true); 
 
-      if(msg == `ORDER_CHECK_OK`){
+    switch(msg) {
+      case "ORDER_CHECK_OK": 
         ctx.data = {orderid: text};
         super.setNewStatusToContext(ctx, text);
-      } else {
-        logger.debug(`Question_RESCHEDULE_01: setNewStatusToContext: ${msg}`);
-        ctx.status = (msg == "INVALID_ORDER") ? "RESCHEDULE_01_INVALID_ORDER" : "RESCHEDULE_01_ALREADY_DELIVERED";
-      }
+        break;
+            
+      case "INVALID_ORDER":
+        ctx.status = "RESCHEDULE_01_INVALID_ORDER";
+        break;
+          
+      case "ALREADY_DELIVERED" :
+        ctx.status = "RESCHEDULE_01_ALREADY_DELIVERED";
+        break;
+        
+      default :
+        ctx.status = "RESCHEDULE_01_DB_ERROR";
+    }
   }
 }
 
@@ -220,7 +227,7 @@ class Question_RESCHEDULE_04 extends Question {
 class Question_RESCHEDULE_END extends Question {
     
   async getQuestionMessage(ctx){
-    if(await setDeliverySchedule(ctx.data.orderid, ctx.data.date, ctx.data.time)) {
+	if(await setDeliverySchedule(ctx.data.orderid, ctx.data.date, ctx.data.time)){
       ctx.status = this.next.success;
       return await lineMessage.getMessageObject(this);
 
@@ -316,6 +323,15 @@ const questionArray = [
   {
     "id":"RESCHEDULE_01_ALREADY_DELIVERED",
     "text":"その伝票番号は配送済みです",
+    "type":"text", 
+    "class": Question_RESCHEDULE_01,  ///// classは　Question_RESCHEDULE_01
+    "next":{
+        "success": "RESCHEDULE_02"
+    }
+  },
+  {
+    "id":"RESCHEDULE_01_DB_ERROR",
+    "text":"データベース・エラーが発生しました。管理者にお問い合わせください。",
     "type":"text", 
     "class": Question_RESCHEDULE_01,  ///// classは　Question_RESCHEDULE_01
     "next":{
