@@ -21,6 +21,10 @@ Oracle DBからのデータ取得と更新を行う LINE Botのサンプルで�
   
 (*) Oracle Cloudにアップロードする場合、accsディレクトリにある botSample.zipとmanifest.jsonを使ってください。
 
+## セットアップ方法
+以下の資料を参照してください。
+[Oracle PaaSでLINE Botを開発してみよう](https://github.com/zabele1971/lineBotSample/blob/master/doc/LINEBotSeminar.pdf)
+
 ## サンプルアプリの動き
 
 ### 機能
